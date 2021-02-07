@@ -37,8 +37,9 @@ impl EasyMarkEditor {
             ScrollArea::auto_sized()
                 .id_source("source")
                 .show(&mut columns[0], |ui| {
-                    // ui.text_edit_multiline(&mut self.code);
                     ui.add(TextEdit::multiline(&mut self.code).text_style(TextStyle::Monospace));
+                    // let cursor = TextEdit::cursor(response.id);
+                    // TODO: cmd-i, cmd-b, etc for italics, bold, ....
                 });
             ScrollArea::auto_sized()
                 .id_source("rendered")
@@ -60,9 +61,11 @@ and is also missing some features.
 
 ----------------
 
+x^2^  v$x$
+
 # At a glance
 - inline text:
-  - normal, `code`, *strong*, ~strikethrough~, _underline_, /italics/
+  - normal, `code`, *strong*, ~strikethrough~, _underline_, /italics/, ^raised^, $small$
   - `\` escapes the next character
   - [hyperlink](https://github.com/emilk/egui)
   - Embedded URL: <https://github.com/emilk/egui>
@@ -113,5 +116,11 @@ The style characters are chosen to be similar to what they are representing:
   - centering of images is very desirable
   - captioning (image with a text underneath it)
   - `![caption=My image][width=200][center](url)` ?
+- Nicer URL:s
+  - `<url>` and `[url](url)` do the same thing yet look completely differen.
+  - let's keep similarity with images
 - Tables
+- https://mycorrhiza.lesarbr.es/page/mycomarkup
+  - ^upper^  10^6^
+  - $small$  v$x$
 "#;

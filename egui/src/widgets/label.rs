@@ -15,6 +15,7 @@ pub struct Label {
     strikethrough: bool,
     underline: bool,
     italics: bool,
+    raised: bool,
 }
 
 impl Label {
@@ -31,6 +32,7 @@ impl Label {
             strikethrough: false,
             underline: false,
             italics: false,
+            raised: false,
         }
     }
 
@@ -104,8 +106,20 @@ impl Label {
         self
     }
 
+    /// Smaller text
     pub fn small(self) -> Self {
         self.text_style(TextStyle::Small)
+    }
+
+    /// For e.g. exponents
+    pub fn small_raised(self) -> Self {
+        self.text_style(TextStyle::Small).raised()
+    }
+
+    /// Align text to top
+    pub fn raised(mut self) -> Self {
+        self.raised = true;
+        self
     }
 
     /// Fill-color behind the text
@@ -157,6 +171,7 @@ impl Label {
             strikethrough,
             underline,
             italics,
+            raised: _, // TODO
             ..
         } = *self;
 
@@ -239,6 +254,7 @@ impl Widget for Label {
 
             let text_style = self.text_style_or_default(ui.style());
             let font = &ui.fonts()[text_style];
+            let font_height = font.row_height();
             let mut galley = font.layout_multiline_with_indentation_and_max_width(
                 self.text.clone(),
                 first_row_indentation,
@@ -253,8 +269,17 @@ impl Widget for Label {
             let mut total_response = ui.interact(rect, id, Sense::hover());
 
             let mut y_translation = 0.0;
-            if let Some(row) = galley.rows.get(1) {
-                // We could be sharing the first row with e.g. a button, that is higher than text.
+            if let Some(row) = galley.rows.get_mut(1) {
+                // if !self.raised {
+                //     // TODO move to lower edge of the row:
+                //     let ui_height = ui.fonts()[TextStyle::Body].row_height(); // TODO: get from ui
+                //     let dy = ui_height - font_height;
+                //     // let dy = ui_height - row.height();
+                //     row.y_min += dy;
+                //     row.y_max += dy;
+                // }
+
+                // We could be sharing the first row with e.g. a button which is higher than text.
                 // So we need to compensate for that:
                 if pos.y + row.y_min < ui.min_rect().bottom() {
                     y_translation = ui.min_rect().bottom() - row.y_min - pos.y;
@@ -264,6 +289,7 @@ impl Widget for Label {
             for row in galley.rows.iter_mut().skip(1) {
                 row.y_min += y_translation;
                 row.y_max += y_translation;
+
                 let rect = row.rect().translate(vec2(pos.x, pos.y));
                 ui.advance_cursor_after_rect(rect);
                 total_response |= ui.interact(rect, id, Sense::hover());
